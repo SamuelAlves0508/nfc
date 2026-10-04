@@ -1,77 +1,250 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { CardIcon, ChevronRight, CloseIcon, HomeIcon, LinkIcon, MoonIcon, MoreIcon, PlusIcon, QrIcon, SunIcon, UsersIcon } from "./icons";
+import { QRCodeCanvas } from "qrcode.react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  CardIcon, ChevronRight, CloseIcon, HomeIcon, LinkIcon, MoonIcon,
+  MoreIcon, PlusIcon, QrIcon, SunIcon, UsersIcon
+} from "./icons";
 
 type View = "home" | "qr" | "clients" | "plates" | "more";
+type Client = { id:number; name:string; channel:string; detail:string; initials:string; tone:string };
+type Plate = { id:number; client:string; type:string; destination:string; active:boolean };
 
-const recent = [
-  { name: "Andreia Paz", detail: "Instagram · QR + NFC", status: "Ativo", initials: "AP" },
-  { name: "Reuse Brechó", detail: "WhatsApp · NFC", status: "Ativo", initials: "RB" },
-  { name: "Byfit Ibiporã", detail: "Google · Avaliações", status: "Ativo", initials: "BI" }
+const initialClients: Client[] = [
+  { id:1, name:"Andreia Paz", channel:"Instagram", detail:"QR + NFC", initials:"AP", tone:"pink" },
+  { id:2, name:"Reuse Brechó", channel:"WhatsApp", detail:"NFC", initials:"RB", tone:"green" },
+  { id:3, name:"Byfit Ibiporã", channel:"Google", detail:"Avaliações", initials:"BI", tone:"black" },
 ];
 
-function BottomNav({ view, setView, openAdd }: { view: View; setView: (v: View)=>void; openAdd:()=>void }) {
-  const item=(key:View,label:string,Icon:typeof HomeIcon)=><button className={view===key?"navItem active":"navItem"} onClick={()=>setView(key)}><Icon/><span>{label}</span></button>;
-  return <nav className="bottomNav">
-    {item("home","Início",HomeIcon)}
-    {item("clients","Clientes",UsersIcon)}
-    <button className="addNav" onClick={openAdd} aria-label="Adicionar"><PlusIcon/></button>
-    {item("plates","Placas",CardIcon)}
-    {item("more","Mais",MoreIcon)}
-  </nav>
+const initialPlates: Plate[] = [
+  { id:1, client:"Andreia Paz", type:"Instagram", destination:"@andreiapaz_acessorios", active:true },
+  { id:2, client:"Reuse Brechó", type:"WhatsApp", destination:"Grupo de vendas", active:true },
+  { id:3, client:"Byfit Ibiporã", type:"Google", destination:"Avaliações Google", active:true },
+  { id:4, client:"Reuse Brechó", type:"Instagram", destination:"Perfil comercial", active:true },
+];
+
+function Brand(){
+  return <div className="brandMark">
+    <Image src="/nfc-pro-icon.svg" width={42} height={42} alt="NFC PRO"/>
+    <div><strong>NFC <b>PRO</b></strong><span>Smart links</span></div>
+  </div>
 }
 
-function Sidebar({view,setView}: {view:View;setView:(v:View)=>void}) {
-  const rows:[View,string,typeof HomeIcon][]=[["home","Visão geral",HomeIcon],["clients","Clientes",UsersIcon],["plates","Placas",CardIcon],["qr","QR Studio",QrIcon],["more","Mais",MoreIcon]];
-  return <aside className="sidebar">
-    <div className="brand"><Image src="/nfc-pro-icon.svg" width={38} height={38} alt="NFC PRO"/><strong>NFC PRO</strong></div>
-    <div className="sideMenu">{rows.map(([k,l,I])=><button key={k} className={view===k?"sideItem active":"sideItem"} onClick={()=>setView(k)}><I/><span>{l}</span></button>)}</div>
-    <div className="sideFoot">v0.1 · interface</div>
-  </aside>
-}
-
-function Header({dark,setDark}: {dark:boolean;setDark:(v:boolean)=>void}) {
+function Topbar({dark,setDark}:{dark:boolean;setDark:(v:boolean)=>void}){
   return <header className="topbar">
-    <div className="mobileBrand"><Image src="/nfc-pro-icon.svg" width={34} height={34} alt="NFC PRO"/><strong>NFC PRO</strong></div>
-    <div className="spacer"/>
-    <button className="iconButton" onClick={()=>setDark(!dark)} aria-label="Alternar tema">{dark?<SunIcon/>:<MoonIcon/>}</button>
-    <div className="avatar">DP</div>
+    <Brand/>
+    <div className="topActions">
+      <button className="roundButton" aria-label="Alternar tema" onClick={()=>setDark(!dark)}>{dark?<SunIcon/>:<MoonIcon/>}</button>
+      <button className="profileButton" aria-label="Perfil"><span>DP</span></button>
+    </div>
   </header>
 }
 
-function Home({setView}:{setView:(v:View)=>void}) {
+function BottomNav({view,setView,onAdd}:{view:View;setView:(v:View)=>void;onAdd:()=>void}){
+  const Item=({id,label,Icon}:{id:View;label:string;Icon:typeof HomeIcon}) =>
+    <button className={view===id?"navItem active":"navItem"} onClick={()=>setView(id)}><Icon/><span>{label}</span></button>;
+  return <nav className="bottomNav">
+    <Item id="home" label="Início" Icon={HomeIcon}/>
+    <Item id="clients" label="Clientes" Icon={UsersIcon}/>
+    <button className="navPlus" onClick={onAdd} aria-label="Criar"><PlusIcon/></button>
+    <Item id="plates" label="Placas" Icon={CardIcon}/>
+    <Item id="more" label="Mais" Icon={MoreIcon}/>
+  </nav>
+}
+
+function Sidebar({view,setView}:{view:View;setView:(v:View)=>void}){
+  const rows:[View,string,typeof HomeIcon][]=[
+    ["home","Visão geral",HomeIcon],["clients","Clientes",UsersIcon],
+    ["plates","Placas",CardIcon],["qr","QR Studio",QrIcon],["more","Configurações",MoreIcon]
+  ];
+  return <aside className="sidebar">
+    <Brand/>
+    <div className="sideMenu">{rows.map(([id,label,Icon])=>
+      <button key={id} className={view===id?"sideItem active":"sideItem"} onClick={()=>setView(id)}><Icon/><span>{label}</span></button>
+    )}</div>
+    <div className="sideBottom"><span>NFC PRO</span><small>v0.2 · mobile first</small></div>
+  </aside>
+}
+
+function SectionHeader({title,action,onAction}:{title:string;action?:string;onAction?:()=>void}){
+  return <div className="sectionHeader"><h2>{title}</h2>{action&&<button onClick={onAction}>{action}<ChevronRight/></button>}</div>
+}
+
+function Home({clients,plates,setView,onAdd}:{clients:Client[];plates:Plate[];setView:(v:View)=>void;onAdd:()=>void}){
+  const accesses=147, qrs=36;
   return <main className="page homePage">
-    <section className="hello"><p className="eyebrow">VISÃO GERAL</p><h1>Boa tarde 👋</h1><p>Gerencie seus clientes e placas em um só lugar.</p></section>
-    <section className="stats">
-      <article className="statCard primaryStat"><div className="statTop"><span>Placas ativas</span><span className="trend">+3 este mês</span></div><strong>18</strong><div className="progress"><i style={{width:"82%"}}/></div></article>
-      <article className="statCard"><span>Clientes</span><strong>12</strong><small>+2 este mês</small></article>
-      <article className="statCard"><span>Acessos</span><strong>147</strong><small>+23 esta semana</small></article>
+    <section className="welcome">
+      <span>Boa tarde,</span>
+      <h1>Vamos continuar?</h1>
+      <p>Gerencie suas placas NFC, QR Codes e clientes de forma simples e profissional.</p>
     </section>
-    <section className="sectionBlock"><div className="sectionTitle"><h2>Ações rápidas</h2></div><div className="quickGrid">
-      <button className="quickCard" onClick={()=>setView("qr")}><span className="quickIcon blue"><QrIcon/></span><div><strong>Gerar QR</strong><small>Personalize e exporte</small></div><ChevronRight/></button>
-      <button className="quickCard"><span className="quickIcon"><CardIcon/></span><div><strong>Nova placa</strong><small>Cadastre uma placa NFC</small></div><ChevronRight/></button>
-      <button className="quickCard"><span className="quickIcon"><UsersIcon/></span><div><strong>Novo cliente</strong><small>Adicione um negócio</small></div><ChevronRight/></button>
-    </div></section>
-    <section className="sectionBlock recentBlock"><div className="sectionTitle"><h2>Recentes</h2><button>Ver todos</button></div><div className="listCard">{recent.map((r,i)=><button className="recentRow" key={r.name}><div className="clientAvatar">{r.initials}</div><div className="clientText"><strong>{r.name}</strong><span>{r.detail}</span></div><div className="status"><i/> {r.status}</div><ChevronRight className="chev"/>{i<recent.length-1&&<span className="divider"/>}</button>)}</div></section>
+
+    <section className="heroCard">
+      <div className="heroCopy">
+        <div className="heroLabel"><span className="glassIcon"><CardIcon/></span><strong>Placas ativas</strong></div>
+        <div className="heroNumber">{plates.filter(p=>p.active).length}</div>
+        <div className="heroGrowth"><span>↗</span> +3 este mês</div>
+      </div>
+      <div className="heroArtwork">
+        <div className="signalRing r1"/><div className="signalRing r2"/><div className="signalRing r3"/>
+        <div className="miniPlate"><Image src="/nfc-pro-icon.svg" width={82} height={82} alt=""/></div>
+      </div>
+      <button className="heroArrow" onClick={()=>setView("plates")}><ChevronRight/></button>
+    </section>
+
+    <section className="metricGrid">
+      <button className="metricCard" onClick={()=>setView("clients")}>
+        <span className="metricIcon"><UsersIcon/></span><small>Clientes</small><strong>{clients.length}</strong><em>↗ +2 este mês</em>
+      </button>
+      <article className="metricCard">
+        <span className="metricIcon bars">▥</span><small>Acessos</small><strong>{accesses}</strong><em>↗ +18%</em>
+      </article>
+      <button className="metricCard" onClick={()=>setView("qr")}>
+        <span className="metricIcon"><QrIcon/></span><small>QRs gerados</small><strong>{qrs}</strong><em>↗ +6 este mês</em>
+      </button>
+    </section>
+
+    <section className="contentSection">
+      <SectionHeader title="Ações rápidas" action="Ver tudo" onAction={onAdd}/>
+      <div className="actionGrid">
+        <button className="actionCard" onClick={()=>setView("qr")}><span><QrIcon/></span><b>Gerar QR</b><small>Crie um QR Code para seu cliente</small><i><ChevronRight/></i></button>
+        <button className="actionCard" onClick={onAdd}><span><LinkIcon/></span><b>Nova placa</b><small>Cadastre uma nova placa NFC</small><i><ChevronRight/></i></button>
+        <button className="actionCard" onClick={onAdd}><span><UsersIcon/></span><b>Novo cliente</b><small>Adicione um novo cliente</small><i><ChevronRight/></i></button>
+      </div>
+    </section>
+
+    <section className="contentSection">
+      <SectionHeader title="Recentes" action="Ver todos" onAction={()=>setView("clients")}/>
+      <div className="recentList">{clients.slice(0,3).map(c=>
+        <button className="recentItem" key={c.id} onClick={()=>setView("clients")}>
+          <span className={"clientLogo "+c.tone}>{c.initials}</span>
+          <span className="recentText"><b>{c.name}</b><small>{c.channel} · {c.detail}</small></span>
+          <span className="activePill"><i/>Ativo</span><ChevronRight/>
+        </button>
+      )}</div>
+    </section>
   </main>
 }
 
-function QrStudio(){
-  const [color,setColor]=useState("#202020"); const [style,setStyle]=useState("Suave");
-  return <main className="page qrPage"><section className="hello"><p className="eyebrow">FERRAMENTAS</p><h1>QR Studio</h1><p>Crie QR Codes bonitos e prontos para suas placas.</p></section>
-    <div className="studioLayout"><section className="editorCard"><label>Destino</label><div className="inputWrap"><LinkIcon/><input defaultValue="https://instagram.com/cliente"/></div><label>Estilo</label><div className="segments">{["Clássico","Pontos","Suave"].map(s=><button key={s} className={style===s?"selected":""} onClick={()=>setStyle(s)}>{s}</button>)}</div><label>Cor</label><div className="colorRow">{["#202020","#2563eb","#a36a16","#7c3aed"].map(c=><button aria-label={c} key={c} className={color===c?"colorSwatch selected":"colorSwatch"} style={{background:c}} onClick={()=>setColor(c)}/>)}</div><label>Centro</label><div className="logoChoices"><button className="selected">Sem logo</button><button>Instagram</button><button>WhatsApp</button></div></section>
-      <section className="previewCard"><div className="previewHead"><span>Prévia</span><small>Atualização em tempo real</small></div><div className="fakeQr" style={{color}}><div className="finder a"/><div className="finder b"/><div className="finder c"/>{Array.from({length:46}).map((_,i)=><i key={i} style={{left:`${12+(i*17)%76}%`,top:`${11+(i*29)%76}%`,borderRadius:style==="Clássico"?"1px":style==="Pontos"?"50%":"4px"}}/>)}</div><button className="primaryButton">Baixar PNG</button><div className="exportLinks"><button>SVG</button><span>•</span><button>PDF</button><span>•</span><button>10 × 12 cm</button></div></section></div>
+function QRStudio(){
+  const [value,setValue]=useState("https://instagram.com/andreiapaz_acessorios");
+  const [color,setColor]=useState("#202020");
+  const [bg,setBg]=useState("#ffffff");
+  const [size,setSize]=useState(280);
+
+  const download=()=>{
+    const canvas=document.getElementById("nfc-pro-qr") as HTMLCanvasElement|null;
+    if(!canvas) return;
+    const a=document.createElement("a");
+    a.download="nfc-pro-qr.png";
+    a.href=canvas.toDataURL("image/png");
+    a.click();
+  };
+
+  return <main className="page toolPage">
+    <section className="pageTitle"><span>FERRAMENTA</span><h1>QR Studio</h1><p>Gere o QR real, ajuste as cores e exporte em alta qualidade.</p></section>
+    <div className="qrWorkspace">
+      <section className="panel controlsPanel">
+        <label>Link de destino</label>
+        <div className="field"><LinkIcon/><input value={value} onChange={e=>setValue(e.target.value)} placeholder="Cole um link"/></div>
+        <div className="controlPair">
+          <div><label>Cor do QR</label><div className="colorField"><input type="color" value={color} onChange={e=>setColor(e.target.value)}/><span>{color.toUpperCase()}</span></div></div>
+          <div><label>Fundo</label><div className="colorField"><input type="color" value={bg} onChange={e=>setBg(e.target.value)}/><span>{bg.toUpperCase()}</span></div></div>
+        </div>
+        <label>Tamanho</label>
+        <div className="rangeRow"><input type="range" min="200" max="600" step="20" value={size} onChange={e=>setSize(Number(e.target.value))}/><b>{size}px</b></div>
+        <div className="tipBox"><span>✓</span><p><b>QR dinâmico na próxima etapa.</b><br/>Esta versão já gera QR funcional para links fixos.</p></div>
+      </section>
+      <section className="panel qrPreviewPanel">
+        <div className="previewTitle"><div><b>Prévia</b><small>Escaneável em tempo real</small></div><span className="liveDot">● LIVE</span></div>
+        <div className="qrStage" style={{background:bg}}>
+          <QRCodeCanvas id="nfc-pro-qr" value={value || "https://nfcpro.app"} size={Math.min(size,340)} bgColor={bg} fgColor={color} level="H" marginSize={2}/>
+        </div>
+        <button className="mainCTA" onClick={download}>Baixar PNG</button>
+        <div className="exportRow"><button onClick={()=>setSize(400)}>Alta resolução</button><span>•</span><button>PDF 10×12 em breve</button></div>
+      </section>
+    </div>
   </main>
 }
 
-function Placeholder({title,subtitle}:{title:string;subtitle:string}){return <main className="page placeholder"><div className="placeholderIcon"><CardIcon/></div><h1>{title}</h1><p>{subtitle}</p><span>Interface reservada para a próxima etapa.</span></main>}
+function Clients({clients,onNew}:{clients:Client[];onNew:()=>void}){
+  const [q,setQ]=useState("");
+  const filtered=useMemo(()=>clients.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.channel.toLowerCase().includes(q.toLowerCase())),[clients,q]);
+  return <main className="page listPage">
+    <section className="pageTitle rowTitle"><div><span>GESTÃO</span><h1>Clientes</h1><p>{clients.length} clientes cadastrados.</p></div><button className="smallCTA" onClick={onNew}><PlusIcon/> Novo</button></section>
+    <div className="searchBox">⌕<input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar cliente..."/></div>
+    <div className="clientCards">{filtered.map(c=>
+      <article className="clientCard" key={c.id}><span className={"clientLogo large "+c.tone}>{c.initials}</span><div><b>{c.name}</b><small>{c.channel} · {c.detail}</small></div><span className="activePill"><i/>Ativo</span><button><ChevronRight/></button></article>
+    )}</div>
+  </main>
+}
+
+function Plates({plates,onNew}:{plates:Plate[];onNew:()=>void}){
+  return <main className="page listPage">
+    <section className="pageTitle rowTitle"><div><span>GESTÃO</span><h1>Placas</h1><p>Acompanhe cada placa e seu destino.</p></div><button className="smallCTA" onClick={onNew}><PlusIcon/> Nova</button></section>
+    <div className="plateGrid">{plates.map(p=>
+      <article className="plateCard" key={p.id}><div className="plateTop"><span className="plateIcon"><CardIcon/></span><span className="activePill"><i/>Ativo</span></div><h3>{p.client}</h3><p>{p.type}</p><div className="plateDestination"><small>Destino</small><b>{p.destination}</b></div><button>Gerenciar <ChevronRight/></button></article>
+    )}</div>
+  </main>
+}
+
+function More({dark,setDark,setView}:{dark:boolean;setDark:(v:boolean)=>void;setView:(v:View)=>void}){
+  return <main className="page listPage">
+    <section className="pageTitle"><span>NFC PRO</span><h1>Mais</h1><p>Preferências e ferramentas.</p></section>
+    <div className="settingsCard">
+      <button onClick={()=>setView("qr")}><span className="settingIcon"><QrIcon/></span><div><b>QR Studio</b><small>Gerador profissional</small></div><ChevronRight/></button>
+      <button onClick={()=>setDark(!dark)}><span className="settingIcon">{dark?<SunIcon/>:<MoonIcon/>}</span><div><b>Aparência</b><small>{dark?"Modo escuro":"Modo claro"}</small></div><span className={dark?"switch on":"switch"}><i/></span></button>
+      <button><span className="settingIcon"><LinkIcon/></span><div><b>Integrações</b><small>Google Places em breve</small></div><ChevronRight/></button>
+    </div>
+  </main>
+}
+
+function CreateSheet({mode,onClose,onCreateClient,onCreatePlate}:{mode:"menu"|"client"|"plate";onClose:()=>void;onCreateClient:(name:string)=>void;onCreatePlate:(client:string)=>void}){
+  const [name,setName]=useState("");
+  return <div className="sheetBackdrop" onClick={onClose}><section className="bottomSheet" onClick={e=>e.stopPropagation()}>
+    <div className="sheetHandle"/>
+    <div className="sheetHeading"><div><b>{mode==="menu"?"Criar novo":mode==="client"?"Novo cliente":"Nova placa"}</b><small>{mode==="menu"?"Escolha uma ação":"Preencha o básico agora"}</small></div><button onClick={onClose}><CloseIcon/></button></div>
+    {mode==="menu"?<div className="sheetActions"><button data-action="qr"><span><QrIcon/></span><div><b>Gerar QR Code</b><small>Abra o QR Studio</small></div><ChevronRight/></button><button data-action="client"><span><UsersIcon/></span><div><b>Novo cliente</b><small>Cadastre um negócio</small></div><ChevronRight/></button><button data-action="plate"><span><CardIcon/></span><div><b>Nova placa</b><small>Registre uma placa NFC</small></div><ChevronRight/></button></div>:
+    <div className="simpleForm"><label>{mode==="client"?"Nome do cliente":"Cliente da placa"}</label><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder={mode==="client"?"Ex: Studio Bella":"Ex: Andreia Paz"}/><button className="mainCTA" disabled={!name.trim()} onClick={()=>mode==="client"?onCreateClient(name.trim()):onCreatePlate(name.trim())}>Salvar</button></div>}
+  </section></div>
+}
 
 export default function App(){
-  const [view,setView]=useState<View>("home"); const [dark,setDark]=useState(false); const [sheet,setSheet]=useState(false);
+  const [view,setView]=useState<View>("home");
+  const [dark,setDark]=useState(false);
+  const [sheet,setSheet]=useState<null|"menu"|"client"|"plate">(null);
+  const [clients,setClients]=useState(initialClients);
+  const [plates,setPlates]=useState(initialPlates);
+
   useEffect(()=>{document.documentElement.dataset.theme=dark?"dark":"light"},[dark]);
-  return <div className="appShell"><Sidebar view={view} setView={setView}/><div className="mainShell"><Header dark={dark} setDark={setDark}/>{view==="home"?<Home setView={setView}/>:view==="qr"?<QrStudio/>:view==="clients"?<Placeholder title="Clientes" subtitle="Organize negócios, contatos e destinos de cada placa."/>:view==="plates"?<Placeholder title="Placas" subtitle="Acompanhe configuração, status e destino das placas NFC."/>:<Placeholder title="Mais" subtitle="Configurações, integrações, aparência e conta."/>}<BottomNav view={view} setView={setView} openAdd={()=>setSheet(true)}/></div>
-    {sheet&&<div className="sheetBackdrop" onClick={()=>setSheet(false)}><section className="bottomSheet" onClick={e=>e.stopPropagation()}><div className="sheetHandle"/><div className="sheetTitle"><div><strong>Criar novo</strong><span>O que você quer fazer?</span></div><button className="iconButton" onClick={()=>setSheet(false)}><CloseIcon/></button></div><button onClick={()=>{setView("qr");setSheet(false)}}><span className="quickIcon blue"><QrIcon/></span><div><strong>Gerar QR Code</strong><small>Crie e personalize um QR</small></div><ChevronRight/></button><button><span className="quickIcon"><CardIcon/></span><div><strong>Nova placa</strong><small>Cadastre uma placa NFC</small></div><ChevronRight/></button><button><span className="quickIcon"><UsersIcon/></span><div><strong>Novo cliente</strong><small>Cadastre um negócio</small></div><ChevronRight/></button></section></div>}
+
+  const createClient=(name:string)=>{
+    const initials=name.split(" ").slice(0,2).map(x=>x[0]?.toUpperCase()).join("");
+    setClients(v=>[{id:Date.now(),name,channel:"Novo cliente",detail:"Sem placa",initials:initials||"NC",tone:"blue"},...v]);
+    setSheet(null); setView("clients");
+  };
+  const createPlate=(client:string)=>{
+    setPlates(v=>[{id:Date.now(),client,type:"NFC",destination:"Não configurado",active:true},...v]);
+    setSheet(null); setView("plates");
+  };
+
+  const render=()=>view==="home"?<Home clients={clients} plates={plates} setView={setView} onAdd={()=>setSheet("menu")}/>:
+    view==="qr"?<QRStudio/>:view==="clients"?<Clients clients={clients} onNew={()=>setSheet("client")}/>:
+    view==="plates"?<Plates plates={plates} onNew={()=>setSheet("plate")}/>:<More dark={dark} setDark={setDark} setView={setView}/>;
+
+  return <div className="appShell">
+    <Sidebar view={view} setView={setView}/>
+    <div className="mainShell"><Topbar dark={dark} setDark={setDark}/>{render()}<BottomNav view={view} setView={setView} onAdd={()=>setSheet("menu")}/></div>
+    {sheet&&<CreateSheet mode={sheet} onClose={()=>setSheet(null)} onCreateClient={createClient} onCreatePlate={createPlate}/>}
+    {sheet==="menu"&&<div className="sheetClickLayer" onClick={(e)=>{
+      const target=(e.target as HTMLElement).closest("button[data-action]") as HTMLButtonElement|null;
+      if(!target)return;
+      const action=target.dataset.action;
+      if(action==="qr"){setSheet(null);setView("qr")}
+      if(action==="client")setSheet("client");
+      if(action==="plate")setSheet("plate");
+    }}/>}
   </div>
 }
