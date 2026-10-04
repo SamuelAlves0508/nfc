@@ -35,12 +35,17 @@ Mobile-first management app for NFC plates, QR codes, clients and access analyti
 - Signal blue: `#60A5FA`
 
 ## Typography
-Use the system Apple stack first: `-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, "Segoe UI", sans-serif`.
-- Large page title: 30–38px, 700, tight tracking.
-- Section title: 17px, 650–700.
-- Body: 13–14px.
-- Secondary/helper: 10–12px.
-- Eyebrow: 10px, 700, uppercase, 0.18em tracking, blue.
+Use **SF Pro Display** as the primary family throughout the interface, with system fallbacks only when the font is unavailable:
+`"SF Pro Display", -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif`.
+
+Global tracking: **-1px**.
+- Large page title: 30–40px, 700, letter-spacing -1px.
+- Section title: 17–20px, 650–700, letter-spacing -1px.
+- Body: 13–14px, letter-spacing -1px.
+- Secondary/helper: 10–12px, letter-spacing -1px.
+- Eyebrow: 10px, 700, uppercase, letter-spacing -1px.
+
+Do not introduce a different font family in new screens or components.
 
 ## Shape language
 - App cards: 15–18px radius.
