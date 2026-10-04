@@ -11,7 +11,7 @@ Primeira versão visual mobile-first do NFC PRO.
 - Bottom sheet de criação
 - Dados mockados
 - Design system em `NFC-PRO-DESIGN.md`
-- Ícone do app em `public/nfc-pro-icon.png`
+- Ícone do app em `public/nfc-pro-icon.svg`
 
 ## Rodar
 ```bash
