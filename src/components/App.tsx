@@ -28,7 +28,7 @@ const initialPlates: Plate[] = [
 function Brand(){
   return <div className="brandMark">
     <Image src="/nfc-pro-icon.svg" width={42} height={42} alt="NFC PRO"/>
-    <div><strong>NFC <b>PRO</b></strong><span>Smart links</span></div>
+    <div><strong>NFC <b>PRO</b></strong><span>GESTÃO NFC + QR</span></div>
   </div>
 }
 
@@ -64,7 +64,7 @@ function Sidebar({view,setView}:{view:View;setView:(v:View)=>void}){
     <div className="sideMenu">{rows.map(([id,label,Icon])=>
       <button key={id} className={view===id?"sideItem active":"sideItem"} onClick={()=>setView(id)}><Icon/><span>{label}</span></button>
     )}</div>
-    <div className="sideBottom"><span>NFC PRO</span><small>v0.2 · mobile first</small></div>
+    <div className="sideBottom"><span>NFC PRO</span><small>Painel administrativo</small></div>
   </aside>
 }
 
@@ -102,7 +102,7 @@ function Home({clients,plates,setView,onAdd}:{clients:Client[];plates:Plate[];se
         <span className="metricIcon bars">▥</span><small>Acessos</small><strong>{accesses}</strong><em>↗ +18%</em>
       </article>
       <button className="metricCard" onClick={()=>setView("qr")}>
-        <span className="metricIcon"><QrIcon/></span><small>QRs gerados</small><strong>{qrs}</strong><em>↗ +6 este mês</em>
+        <span className="metricIcon"><QrIcon/></span><small>QR Codes</small><strong>{qrs}</strong><em>↗ +6 este mês</em>
       </button>
     </section>
 
@@ -110,7 +110,7 @@ function Home({clients,plates,setView,onAdd}:{clients:Client[];plates:Plate[];se
       <SectionHeader title="Ações rápidas" action="Ver tudo" onAction={onAdd}/>
       <div className="actionGrid">
         <button className="actionCard" onClick={()=>setView("qr")}><span><QrIcon/></span><b>Gerar QR</b><small>Crie um QR Code para seu cliente</small><i><ChevronRight/></i></button>
-        <button className="actionCard" onClick={onAdd}><span><LinkIcon/></span><b>Nova placa</b><small>Cadastre uma nova placa NFC</small><i><ChevronRight/></i></button>
+        <button className="actionCard" onClick={onAdd}><span><CardIcon/></span><b>Nova placa</b><small>Cadastre uma nova placa NFC</small><i><ChevronRight/></i></button>
         <button className="actionCard" onClick={onAdd}><span><UsersIcon/></span><b>Novo cliente</b><small>Adicione um novo cliente</small><i><ChevronRight/></i></button>
       </div>
     </section>
@@ -158,7 +158,7 @@ function QRStudio(){
         <div className="tipBox"><span>✓</span><p><b>QR dinâmico na próxima etapa.</b><br/>Esta versão já gera QR funcional para links fixos.</p></div>
       </section>
       <section className="panel qrPreviewPanel">
-        <div className="previewTitle"><div><b>Prévia</b><small>Escaneável em tempo real</small></div><span className="liveDot">● LIVE</span></div>
+        <div className="previewTitle"><div><b>Prévia</b><small>Escaneável em tempo real</small></div><span className="liveDot">● AO VIVO</span></div>
         <div className="qrStage" style={{background:bg}}>
           <QRCodeCanvas id="nfc-pro-qr" value={value || "https://nfcpro.app"} size={Math.min(size,340)} bgColor={bg} fgColor={color} level="H" marginSize={2}/>
         </div>
