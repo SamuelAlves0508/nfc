@@ -1,17 +1,18 @@
 # NFC PRO
 
-Primeira versão visual mobile-first do NFC PRO.
+Aplicativo mobile-first para gestão de placas NFC, QR Codes e clientes.
 
-## Incluído
-- Home / visão geral
-- Bottom navigation mobile
-- Sidebar desktop
-- QR Studio visual
-- Light/dark theme
-- Bottom sheet de criação
-- Dados mockados
+## v0.2
+- Home redesenhada com identidade premium azul/branco
+- Navegação mobile e sidebar desktop
+- Clientes com busca e cadastro local
+- Placas com cadastro local
+- QR Studio com QR Code real
+- Personalização de cor e fundo do QR
+- Exportação do QR em PNG
+- Modo claro/escuro
+- Manifest para instalação como app/PWA
 - Design system em `NFC-PRO-DESIGN.md`
-- Ícone do app em `public/nfc-pro-icon.svg`
 
 ## Rodar
 ```bash
@@ -19,7 +20,14 @@ npm install
 npm run dev
 ```
 
-Depois abra `http://localhost:3000`.
+## Build
+```bash
+npm run build
+```
 
-## Importante
-Esta versão é somente interface. Não há banco, autenticação, Google Places, NFC real ou geração real de QR ainda.
+## Próximas integrações
+- Banco de dados e autenticação
+- Google Places / link de avaliações
+- QR dinâmico e analytics
+- PDF 10 × 12 cm
+- Persistência real de clientes e placas
