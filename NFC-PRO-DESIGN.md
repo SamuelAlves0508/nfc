@@ -38,12 +38,12 @@ Mobile-first management app for NFC plates, QR codes, clients and access analyti
 Use **SF Pro Display** as the primary family throughout the interface, with system fallbacks only when the font is unavailable:
 `"SF Pro Display", -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif`.
 
-Global tracking: **-1px**.
+Primary tracking: **-1px** for headings, numbers, labels and normal UI copy. Preserve the tight SF Pro character of the product without sacrificing legibility.
 - Large page title: 30–40px, 700, letter-spacing -1px.
 - Section title: 17–20px, 650–700, letter-spacing -1px.
-- Body: 13–14px, letter-spacing -1px.
-- Secondary/helper: 10–12px, letter-spacing -1px.
-- Eyebrow: 10px, 700, uppercase, letter-spacing -1px.
+- Body: 13–14px, normally -1px; helper paragraphs may use -0.35px when required for readability.
+- Microcopy at 8–11px may use approximately -0.2px to prevent glyph collisions on mobile screens.
+- Never compensate for cramped layouts by shrinking important text below readable sizes.
 
 Do not introduce a different font family in new screens or components.
 
