@@ -201,12 +201,12 @@ function More({dark,setDark,setView}:{dark:boolean;setDark:(v:boolean)=>void;set
   </main>
 }
 
-function CreateSheet({mode,onClose,onCreateClient,onCreatePlate}:{mode:"menu"|"client"|"plate";onClose:()=>void;onCreateClient:(name:string)=>void;onCreatePlate:(client:string)=>void}){
+function CreateSheet({mode,onClose,onCreateClient,onCreatePlate,onSelect}:{mode:"menu"|"client"|"plate";onClose:()=>void;onCreateClient:(name:string)=>void;onCreatePlate:(client:string)=>void;onSelect:(action:"qr"|"client"|"plate")=>void}){
   const [name,setName]=useState("");
   return <div className="sheetBackdrop" onClick={onClose}><section className="bottomSheet" onClick={e=>e.stopPropagation()}>
     <div className="sheetHandle"/>
     <div className="sheetHeading"><div><b>{mode==="menu"?"Criar novo":mode==="client"?"Novo cliente":"Nova placa"}</b><small>{mode==="menu"?"Escolha uma ação":"Preencha o básico agora"}</small></div><button onClick={onClose}><CloseIcon/></button></div>
-    {mode==="menu"?<div className="sheetActions"><button data-action="qr"><span><QrIcon/></span><div><b>Gerar QR Code</b><small>Abra o QR Studio</small></div><ChevronRight/></button><button data-action="client"><span><UsersIcon/></span><div><b>Novo cliente</b><small>Cadastre um negócio</small></div><ChevronRight/></button><button data-action="plate"><span><CardIcon/></span><div><b>Nova placa</b><small>Registre uma placa NFC</small></div><ChevronRight/></button></div>:
+    {mode==="menu"?<div className="sheetActions"><button onClick={()=>onSelect("qr")}><span><QrIcon/></span><div><b>Gerar QR Code</b><small>Abra o QR Studio</small></div><ChevronRight/></button><button onClick={()=>onSelect("client")}><span><UsersIcon/></span><div><b>Novo cliente</b><small>Cadastre um negócio</small></div><ChevronRight/></button><button onClick={()=>onSelect("plate")}><span><CardIcon/></span><div><b>Nova placa</b><small>Registre uma placa NFC</small></div><ChevronRight/></button></div>:
     <div className="simpleForm"><label>{mode==="client"?"Nome do cliente":"Cliente da placa"}</label><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder={mode==="client"?"Ex: Studio Bella":"Ex: Andreia Paz"}/><button className="mainCTA" disabled={!name.trim()} onClick={()=>mode==="client"?onCreateClient(name.trim()):onCreatePlate(name.trim())}>Salvar</button></div>}
   </section></div>
 }
@@ -237,14 +237,9 @@ export default function App(){
   return <div className="appShell">
     <Sidebar view={view} setView={setView}/>
     <div className="mainShell"><Topbar dark={dark} setDark={setDark}/>{render()}<BottomNav view={view} setView={setView} onAdd={()=>setSheet("menu")}/></div>
-    {sheet&&<CreateSheet mode={sheet} onClose={()=>setSheet(null)} onCreateClient={createClient} onCreatePlate={createPlate}/>}
-    {sheet==="menu"&&<div className="sheetClickLayer" onClick={(e)=>{
-      const target=(e.target as HTMLElement).closest("button[data-action]") as HTMLButtonElement|null;
-      if(!target)return;
-      const action=target.dataset.action;
-      if(action==="qr"){setSheet(null);setView("qr")}
-      if(action==="client")setSheet("client");
-      if(action==="plate")setSheet("plate");
+    {sheet&&<CreateSheet mode={sheet} onClose={()=>setSheet(null)} onCreateClient={createClient} onCreatePlate={createPlate} onSelect={(action)=>{
+      if(action==="qr"){setSheet(null);setView("qr");return}
+      setSheet(action);
     }}/>}
   </div>
 }
