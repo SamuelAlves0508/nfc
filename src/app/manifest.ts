@@ -5,14 +5,38 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "NFC PRO",
     short_name: "NFC PRO",
     description: "Gestão de placas NFC, QR Codes e clientes.",
+    id: "/",
     start_url: "/",
+    scope: "/",
     display: "standalone",
-    background_color: "#eef2f8",
-    theme_color: "#eef2f8",
+    background_color: "#f6f7fb",
+    theme_color: "#f6f7fb",
     orientation: "portrait",
     icons: [
-      { src: "/nfc-pro-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
-      { src: "/nfc-pro-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" }
-    ]
+      {
+        src: "/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/nfc-pro-icon.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "any",
+      },
+      {
+        src: "/nfc-pro-icon.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "maskable",
+      },
+    ],
   };
 }
